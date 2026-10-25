@@ -19,7 +19,7 @@ FROM debian:12
 
 ENV container=docker
 # Use regional mirrors (Thailand and Singapore) with upstream fallback for faster package downloads
-RUN sed -i 's|URIs: http://deb.debian.org/debian|URIs: http://ftp.th.debian.org/debian http://ftp.sg.debian.org/debian http://deb.debian.org/debian|' /etc/apt/sources.list.d/debian.sources \
+RUN sed -i 's|URIs: http://deb.debian.org/debian$|URIs: http://ftp.th.debian.org/debian http://ftp.sg.debian.org/debian http://deb.debian.org/debian|' /etc/apt/sources.list.d/debian.sources \
     && apt-get update && apt-get install -y --no-install-recommends \
       systemd systemd-sysv dbus ca-certificates curl sudo \
     && rm -rf /var/lib/apt/lists/* \
@@ -41,7 +41,7 @@ docker build -t vps-test -f Dockerfile.systemd-test .
 
 docker run -d --name vps \
   --cgroupns=host \
-  --tmpfs /tmp --tmpfs /run --tmpfs /run/lock \
+  --tmpfs /tmp:exec --tmpfs /run --tmpfs /run/lock \
   -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
   --security-opt seccomp=unconfined \
   vps-test
@@ -82,7 +82,7 @@ docker commit vps vps-test:clean
 docker rm -f vps
 docker run -d --name vps \
   --cgroupns=host \
-  --tmpfs /tmp --tmpfs /run --tmpfs /run/lock \
+  --tmpfs /tmp:exec --tmpfs /run --tmpfs /run/lock \
   -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
   --security-opt seccomp=unconfined \
   vps-test:clean
@@ -97,7 +97,7 @@ services:
       context: .
       dockerfile: Dockerfile.systemd-test
     cgroup: host
-    tmpfs: [/tmp, /run, /run/lock]
+    tmpfs: [/tmp:exec, /run, /run/lock]
     volumes:
       - /sys/fs/cgroup:/sys/fs/cgroup:rw
     security_opt:

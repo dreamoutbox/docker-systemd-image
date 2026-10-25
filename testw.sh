@@ -47,7 +47,8 @@ start_container() {
   # Run container with cgroups and tmpfs mounts as specified in recipe.md
   docker run -d --name "${container_name}" \
     --cgroupns=host \
-    --tmpfs /tmp --tmpfs /run --tmpfs /run/lock \
+    --privileged \
+    --tmpfs /tmp:exec --tmpfs /run --tmpfs /run/lock \
     -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
     --security-opt seccomp=unconfined \
     "${image_tag}" >/dev/null
@@ -85,7 +86,10 @@ execute_target_script() {
 
   echo "--- Execution Output (${script_name}) ---"
   # Execute script directly to stream all output to the terminal
-  docker exec "${container_name}" "${container_dest}"
+  local exit_code=0
+  docker exec "${container_name}" "${container_dest}" || exit_code=$?
+  echo "Script exited with code: ${exit_code}"
+  return "${exit_code}"
 }
 
 # main - Entrypoint parsing arguments and orchestrating test container lifecycle.
@@ -121,8 +125,12 @@ main() {
   CONTAINER_NAME="vps-test-$$-$(date +%s)"
   start_container "${CONTAINER_NAME}" "${IMAGE_NAME}"
   wait_for_systemd "${CONTAINER_NAME}"
-  execute_target_script "${CONTAINER_NAME}" "${target_script}"
-  echo "Test finished successfully."
+  local exit_code=0
+  execute_target_script "${CONTAINER_NAME}" "${target_script}" || exit_code=$?
+  if [[ "${exit_code}" -eq 0 ]]; then
+    echo "Test finished successfully."
+  fi
+  return "${exit_code}"
 }
 
 main "$@"
