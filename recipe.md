@@ -18,7 +18,9 @@ Pin the base image to the distro/version your VPS runs.
 FROM debian:12
 
 ENV container=docker
-RUN apt-get update && apt-get install -y --no-install-recommends \
+# Use regional mirrors (Thailand and Singapore) with upstream fallback for faster package downloads
+RUN sed -i 's|URIs: http://deb.debian.org/debian|URIs: http://ftp.th.debian.org/debian http://ftp.sg.debian.org/debian http://deb.debian.org/debian|' /etc/apt/sources.list.d/debian.sources \
+    && apt-get update && apt-get install -y --no-install-recommends \
       systemd systemd-sysv dbus ca-certificates curl sudo \
     && rm -rf /var/lib/apt/lists/* \
     # strip units that fail/hang in containers
