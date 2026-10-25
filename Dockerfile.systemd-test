@@ -1,0 +1,15 @@
+FROM debian:12
+
+ENV container=docker
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      systemd systemd-sysv dbus ca-certificates curl sudo \
+    && rm -rf /var/lib/apt/lists/* \
+    # strip units that fail/hang in containers
+    && find /etc/systemd/system /lib/systemd/system \
+         \( -path '*.wants/*' \) \
+         \( -name '*getty*' -o -name '*udev*' -o -name '*systemd-remount-fs*' \
+            -o -name '*systemd-logind*' -o -name '*systemd-networkd*' \) \
+         -delete
+
+STOPSIGNAL SIGRTMIN+3
+CMD ["/sbin/init"]
