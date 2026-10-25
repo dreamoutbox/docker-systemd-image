@@ -12,7 +12,7 @@ Test VPS setup scripts that manage `systemd` services inside a lightweight Docke
 ## File Structure
 
 - `Dockerfile.systemd-test`: Debian 12 base image configured with `systemd` as PID 1, stripping units that hang or fail in container environments.
-- `setup-script-test.sh`: Test wrapper script that orchestrates container creation, script execution, log streaming, and container cleanup.
+- `testw.sh`: Test wrapper script that orchestrates container creation, script execution, log streaming, and container cleanup.
 - `setup.sh`: Sample VPS setup script demonstrating unit file creation, daemon reload, service enablement, and verification.
 - `recipe.md`: Detailed manual recipe, compose references, and troubleshooting tips.
 
@@ -20,22 +20,22 @@ Test VPS setup scripts that manage `systemd` services inside a lightweight Docke
 
 1. Make scripts executable:
    ```bash
-   chmod +x setup-script-test.sh setup.sh
+   chmod +x testw.sh setup.sh
    ```
 
 2. Test a setup script:
    ```bash
-   ./setup-script-test.sh setup.sh
+   ./testw.sh setup.sh
    ```
 
 3. Test any custom setup script:
    ```bash
-   ./setup-script-test.sh ./path/to/your-script.sh
+   ./testw.sh ./path/to/your-script.sh
    ```
 
 ## Test Runner Lifecycle
 
-`setup-script-test.sh` performs the following steps:
+`testw.sh` performs the following steps:
 
 1. **Image Check**: Builds `vps-test` from `Dockerfile.systemd-test` if not already present.
 2. **Container Launch**: Spawns an isolated container with cgroup host namespace, unconfined seccomp profile, and tmpfs mounts on `/tmp`, `/run`, and `/run/lock`.
