@@ -2,7 +2,7 @@
 set -euo pipefail
 
 CONTAINER_NAME=""
-IMAGE_NAME="vps-test"
+export IMAGE_NAME="${IMAGE_NAME:-vps-test}"
 
 # cleanup - Stops and removes the Docker container if active.
 # Arguments:
@@ -17,19 +17,19 @@ cleanup() {
   fi
 }
 
-# ensure_image - Builds the systemd Docker image if it does not exist.
+# ensure_image - Builds the systemd Docker image via docker-build-image.sh if it does not exist.
 # Arguments:
-#   $1 - image_tag: Name/tag of the target Docker image.
-#   $2 - dockerfile_path: Path to the Dockerfile to build from.
+#   $1 - image_tag: Name/tag of the target Docker image (also exported as IMAGE_NAME for the build script).
+#   $2 - build_script: Path to docker-build-image.sh.
 # Example usage:
-#   ensure_image "vps-test" "./Dockerfile.systemd-test"
+#   ensure_image "vps-test" "./docker-build-image.sh"
 ensure_image() {
   local image_tag="$1"
-  local dockerfile_path="$2"
+  local build_script="$2"
 
   if ! docker image inspect "${image_tag}" >/dev/null 2>&1; then
-    echo "Docker image '${image_tag}' not found. Building from ${dockerfile_path}..."
-    docker build -t "${image_tag}" -f "${dockerfile_path}" "$(dirname "${dockerfile_path}")"
+    echo "Docker image '${image_tag}' not found. Running ${build_script}..."
+    IMAGE_NAME="${image_tag}" IMAGE_TAG=latest "${build_script}"
   fi
 }
 
@@ -111,16 +111,16 @@ main() {
 
   local script_dir
   script_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-  local dockerfile="${script_dir}/Dockerfile.systemd-test"
+  local build_script="${script_dir}/docker-build-image.sh"
 
-  if [[ ! -f "${dockerfile}" ]]; then
-    echo "Error: Dockerfile '${dockerfile}' not found." >&2
+  if [[ ! -x "${build_script}" ]]; then
+    echo "Error: Build script '${build_script}' not found or not executable." >&2
     exit 1
   fi
 
   trap cleanup EXIT INT TERM
 
-  ensure_image "${IMAGE_NAME}" "${dockerfile}"
+  ensure_image "${IMAGE_NAME}" "${build_script}"
 
   CONTAINER_NAME="vps-test-$$-$(date +%s)"
   start_container "${CONTAINER_NAME}" "${IMAGE_NAME}"
