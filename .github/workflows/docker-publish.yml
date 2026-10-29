@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
 
 env:
-  IMAGE_NAME: ${{ vars.IMAGE_NAME || format('{0}/vps-test', secrets.DOCKERHUB_USERNAME) }}
+  IMAGE_NAME: ${{ vars.IMAGE_NAME || format('{0}/docker-systemd-image', secrets.DOCKERHUB_USERNAME) }}
 
 jobs:
   build-push:

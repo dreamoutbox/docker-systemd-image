@@ -37,7 +37,7 @@ Test VPS setup scripts that manage `systemd` services inside a lightweight Docke
 
 `testw.sh` performs the following steps:
 
-1. **Image Check**: Builds `vps-test` from `Dockerfile.systemd-test` if not already present.
+1. **Image Check**: Builds `dreamoutbox/docker-systemd-image` from `Dockerfile.systemd-test` if not already present.
 2. **Container Launch**: Spawns an isolated container with cgroup host namespace, unconfined seccomp profile, and tmpfs mounts on `/tmp` (with `exec`), `/run`, and `/run/lock`.
 3. **Boot Readiness**: Waits for systemd to complete initialization (`systemctl is-system-running --wait`).
 4. **Execution**: Copies the target setup script into `/root/`, marks it executable, and executes it. Output streams directly to your terminal.

@@ -2,7 +2,7 @@
 set -euo pipefail
 
 CONTAINER_NAME=""
-export IMAGE_NAME="${IMAGE_NAME:-vps-test}"
+export IMAGE_NAME="${IMAGE_NAME:-dreamoutbox/docker-systemd-image}"
 
 # cleanup - Stops and removes the Docker container if active.
 # Arguments:
@@ -22,7 +22,7 @@ cleanup() {
 #   $1 - image_tag: Name/tag of the target Docker image (also exported as IMAGE_NAME for the build script).
 #   $2 - build_script: Path to docker-build-image.sh.
 # Example usage:
-#   ensure_image "vps-test" "./docker-build-image.sh"
+#   ensure_image "dreamoutbox/docker-systemd-image" "./docker-build-image.sh"
 ensure_image() {
   local image_tag="$1"
   local build_script="$2"
@@ -38,7 +38,7 @@ ensure_image() {
 #   $1 - container_name: Unique name to assign to the container.
 #   $2 - image_tag: Target Docker image tag to run.
 # Example usage:
-#   start_container "vps-test-1234" "vps-test"
+#   start_container "vps-test-1234" "dreamoutbox/docker-systemd-image"
 start_container() {
   local container_name="$1"
   local image_tag="$2"
@@ -122,7 +122,7 @@ main() {
 
   ensure_image "${IMAGE_NAME}" "${build_script}"
 
-  CONTAINER_NAME="vps-test-$$-$(date +%s)"
+  CONTAINER_NAME="docker-systemd-image-$$-$(date +%s)"
   start_container "${CONTAINER_NAME}" "${IMAGE_NAME}"
   wait_for_systemd "${CONTAINER_NAME}"
   local exit_code=0

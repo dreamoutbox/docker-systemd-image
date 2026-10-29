@@ -37,14 +37,14 @@ CMD ["/sbin/init"]
 ## Build and run
 
 ```bash
-docker build -t vps-test -f Dockerfile.systemd-test .
+docker build -t dreamoutbox/docker-systemd-image -f Dockerfile.systemd-test .
 
 docker run -d --name vps \
   --cgroupns=host \
   --tmpfs /tmp:exec --tmpfs /run --tmpfs /run/lock \
   -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
   --security-opt seccomp=unconfined \
-  vps-test
+  dreamoutbox/docker-systemd-image
 ```
 
 Avoid `--privileged`; use it only as a last-resort fallback.
@@ -76,7 +76,7 @@ docker exec vps bash /root/setup.sh && echo "idempotent OK"
 Snapshot a clean boot, then restore per test run:
 
 ```bash
-docker commit vps vps-test:clean
+docker commit vps dreamoutbox/docker-systemd-image:clean
 
 # each iteration
 docker rm -f vps
@@ -85,7 +85,7 @@ docker run -d --name vps \
   --tmpfs /tmp:exec --tmpfs /run --tmpfs /run/lock \
   -v /sys/fs/cgroup:/sys/fs/cgroup:rw \
   --security-opt seccomp=unconfined \
-  vps-test:clean
+  dreamoutbox/docker-systemd-image:clean
 ```
 
 ## Compose equivalent
@@ -109,7 +109,7 @@ services:
 
 ```bash
 docker rm -f vps
-docker rmi vps-test vps-test:clean
+docker rmi dreamoutbox/docker-systemd-image dreamoutbox/docker-systemd-image:clean
 ```
 
 ## Troubleshooting
